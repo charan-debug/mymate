@@ -31,10 +31,10 @@ def download_youtube_video(url, output_path='downloads'):
         return None, f"An error occurred: {e}"
 
 # Streamlit App
-st.title("YouTube Video Downloader & Player")
+st.title("MYMATE")
 
 # Input for YouTube URL
-video_url = st.text_input("Enter the YouTube video URL:")
+video_url = st.text_input("Enter the video URL:")
 
 # Download and Play Button
 if st.button("Download and Play"):
