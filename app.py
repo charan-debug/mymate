@@ -1,10 +1,18 @@
+import shutil
 import streamlit as st
 import yt_dlp
 import os
 from pathlib import Path
 
+def is_ffmpeg_installed():
+    """Check if ffmpeg is installed."""
+    return shutil.which("ffmpeg") is not None
+
 def download_youtube_video(url, output_path='downloads'):
     """Download a YouTube video and return its path."""
+    if not is_ffmpeg_installed():
+        return None, "FFmpeg is not installed. Please install FFmpeg to enable video merging."
+
     # Ensure the output directory exists
     os.makedirs(output_path, exist_ok=True)
     
