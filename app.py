@@ -17,10 +17,17 @@ def download_youtube_video(url, output_path='downloads'):
     os.makedirs(output_path, exist_ok=True)
     
     ydl_opts = {
-        'format': 'bestvideo[height<=720]+bestaudio/best[height<=720]',
+        'format': 'bv*+ba/b',
         'outtmpl': f'{output_path}/%(title)s.%(ext)s',
         'merge_output_format': 'mp4',
+        'noplaylist': True,  # Ensures only a single video is downloaded
+        'quiet': True,       # Reduces log spam in Streamlit
+        'nocheckcertificate': True,  # Avoids SSL verification issues
+        'http_headers': {  # Mimic a real browser to bypass 403 errors
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        },
     }
+    
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=True)
@@ -31,14 +38,14 @@ def download_youtube_video(url, output_path='downloads'):
         return None, f"An error occurred: {e}"
 
 # Streamlit App
-st.title("MYMATE")
+st.title("MYMATE - YouTube Video Downloader")
 
 # Input for YouTube URL
 video_url = st.text_input("Enter the video URL:")
 
 # Download and Play Button
 if st.button("Download and Play"):
-    if video_url.strip() == "":
+    if not video_url.strip():
         st.error("Please enter a valid YouTube video URL.")
     else:
         with st.spinner("Downloading..."):
