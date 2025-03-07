@@ -13,19 +13,22 @@ def download_youtube_video(url, output_path='downloads'):
     if not is_ffmpeg_installed():
         return None, "FFmpeg is not installed. Please install FFmpeg to enable video merging."
 
-    # Ensure the output directory exists
     os.makedirs(output_path, exist_ok=True)
     
     ydl_opts = {
-        'format': 'bv*+ba/b',
+        'format': 'best',
         'outtmpl': f'{output_path}/%(title)s.%(ext)s',
         'merge_output_format': 'mp4',
-        'noplaylist': True,  # Ensures only a single video is downloaded
-        'quiet': True,       # Reduces log spam in Streamlit
-        'nocheckcertificate': True,  # Avoids SSL verification issues
-        'http_headers': {  # Mimic a real browser to bypass 403 errors
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        'nocheckcertificate': True,
+        'noplaylist': True,
+        'quiet': True,
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': 'https://www.youtube.com/',
         },
+        'force-ipv4': True,
+        'cookiefile': 'cookies.txt',
     }
     
     try:
@@ -38,25 +41,19 @@ def download_youtube_video(url, output_path='downloads'):
         return None, f"An error occurred: {e}"
 
 # Streamlit App
-st.title("MYMATE - YouTube Video Downloader")
+st.title("MYMATE")
 
-# Input for YouTube URL
 video_url = st.text_input("Enter the video URL:")
 
-# Download and Play Button
 if st.button("Download and Play"):
-    if not video_url.strip():
+    if video_url.strip() == "":
         st.error("Please enter a valid YouTube video URL.")
     else:
         with st.spinner("Downloading..."):
             video_path, message = download_youtube_video(video_url)
             if video_path:
                 st.success(message)
-                
-                # Display the video in the Streamlit app
                 st.video(str(video_path))
-                
-                # Provide a download link
                 with open(video_path, "rb") as video_file:
                     video_bytes = video_file.read()
                     st.download_button(
