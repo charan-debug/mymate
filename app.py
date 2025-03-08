@@ -1,5 +1,5 @@
-import shutil
 import streamlit as st
+import shutil
 import yt_dlp
 import os
 from pathlib import Path
@@ -20,6 +20,12 @@ def download_youtube_video(url, output_path='downloads'):
         'format': 'bestvideo[height<=720]+bestaudio/best[height<=720]',
         'outtmpl': f'{output_path}/%(title)s.%(ext)s',
         'merge_output_format': 'mp4',
+        'geo_bypass': True,  # Bypass geo-restrictions
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+        },
     }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -30,33 +36,19 @@ def download_youtube_video(url, output_path='downloads'):
     except Exception as e:
         return None, f"An error occurred: {e}"
 
-# Streamlit App
-st.title("MYMATE")
+# Streamlit UI
+st.title("YouTube Video Downloader")
+video_url = st.text_input("Enter the YouTube video URL:")
 
-# Input for YouTube URL
-video_url = st.text_input("Enter the video URL:")
-
-# Download and Play Button
-if st.button("Download and Play"):
+if st.button('Download'):
     if video_url.strip() == "":
         st.error("Please enter a valid YouTube video URL.")
     else:
-        with st.spinner("Downloading..."):
+        with st.spinner('Downloading...'):
             video_path, message = download_youtube_video(video_url)
             if video_path:
                 st.success(message)
-                
-                # Display the video in the Streamlit app
                 st.video(str(video_path))
-                
-                # Provide a download link
-                with open(video_path, "rb") as video_file:
-                    video_bytes = video_file.read()
-                    st.download_button(
-                        label="Download Video",
-                        data=video_bytes,
-                        file_name=video_path.name,
-                        mime="video/mp4"
-                    )
+                st.markdown(f"[Download the video here](./{video_path})")
             else:
                 st.error(message)
